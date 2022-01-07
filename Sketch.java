@@ -7,13 +7,19 @@ public class Sketch extends PApplet {
   // global variables
   Random rand = new Random();
   public float width = 1200f;
-  public float height = 1000f;
+  public float height = 1200f;
   public float widthSF = width / 400f;
   public float heightSF = height / 400f;
-  public float starScale = 0.35f;
+  public float circleX = 50f;
+  public float circleY = 50f;
   public int sunSize = 55;
   public int moonSize = 40;
+  public int cloudSize = 30;
   public boolean night = false;
+  public boolean upPressed = false;
+  public boolean downPressed = false;
+  public boolean leftPressed = false;
+  public boolean rightPressed = false;
 
 
   /**
@@ -30,12 +36,9 @@ public class Sketch extends PApplet {
    * values here i.e background, stroke, fill etc.
    */
   public void setup() {
-    
     background(115, 235, 255);
     ground();
-    sun();
     house();
-
   }
 
 
@@ -44,6 +47,26 @@ public class Sketch extends PApplet {
    */
   public void draw() {
     // draw
+    if (upPressed) {
+      circleY-=2;
+    }
+    if (downPressed) {
+      circleY+=2;
+    }
+    if (leftPressed) {
+      circleX-=2;
+    }
+    if (rightPressed) {
+      circleX+=2;
+    }
+    if (!night) {
+      fill(255, 255, 0); 
+      ellipse(circleX, circleY, sunSize, sunSize);
+    }
+    else if (night) {
+      fill(255);
+      ellipse(circleX, circleY, moonSize, moonSize);
+    }
     if (mousePressed) {
       fill(255);
       if (!night) {
@@ -53,29 +76,99 @@ public class Sketch extends PApplet {
         star(mouseX, mouseY, 5 * widthSF, 11 * heightSF, 5);
       }
     }
+    if (keyPressed) {
+      if (!night) {
+        fill(255, 255, 0);
+        ellipse(rand.nextInt((int)width), (rand.nextInt((int)(190f * heightSF))), sunSize, sunSize);
+      }
+      else if (night) {
+        fill(255);
+        ellipse(rand.nextInt((int)width), (rand.nextInt((int)(190f * heightSF))), moonSize, moonSize);
+      }
+    }
   }
+  
 
-  // change day time
-  public void keyPressed() {
-    if (!night) {
-      night = true;
-      background(0);
-      moon();
+  // draw only one cloud/moon
+  public void mouseClicked() {
+    if(!night) {
+      fill(255, 0, 255); 
+      cloud();
     }
     else if (night) {
-      night = false;
-      background(115, 235, 255);
-      sun();
+      fill(255, 255, 0);
+      star(mouseX, mouseY, 5 * widthSF, 11 * heightSF, 5);
+    }
+  }
+
+
+  // continously move sun/moon when keys pressed
+  public void keyPressed() {
+    if (keyCode == UP) {
+      upPressed = true;
+    }
+    else if (keyCode == DOWN) {
+      downPressed = true;
+    }
+    else if (keyCode == LEFT) {
+      leftPressed = true;
+    }
+    else if (keyCode == RIGHT) {
+      rightPressed = true;
+    }
+  }
+
+
+  // functions for keys released
+  public void keyReleased() {
+    // change time of day 
+    if (key == ' ') {
+      if (!night) {
+        night = true;
+        nightTime();
       }
+      else if (night) {
+        night = false;
+        dayTime();
+      }
+    }
+    if (keyCode == UP) {
+      upPressed = false;
+    }
+    else if (keyCode == DOWN) {
+      downPressed = false;
+    }
+    else if (keyCode == LEFT) {
+      leftPressed = false;
+    }
+    else if (keyCode == RIGHT) {
+      rightPressed = false;
+    }
+  }
+
+
+  // day scene
+  public void dayTime() {
+    background(115, 235, 255);
     ground();
     house();
   }
+   
+
+  // night scene
+  public void nightTime() {
+    background(0);
+    ground();
+    house();
+  }
+
 
   // draw ground
   public void ground() {
     fill(0, 255, 0); 
     rect(0, 300 * heightSF, width, height - 300);
   }
+
 
   // draw house
   public void house() {
@@ -89,23 +182,26 @@ public class Sketch extends PApplet {
       fill(165, 42, 42);
       rect(200 * widthSF, 277 * heightSF, 10 * widthSF, 20 * heightSF);
   }
-  
-  // draw sun
-  public void sun() {
-    fill(255, 255, 0);
-    ellipse(rand.nextInt((int)width), (rand.nextInt((int)(190f * heightSF))), sunSize * widthSF, sunSize * heightSF);
-  }
 
-  // draw moon
-  public void moon() {
-    fill(255);
-    ellipse(rand.nextInt((int)width), (rand.nextInt((int)(190f * heightSF))), moonSize * widthSF, moonSize * heightSF);    
-  }
 
   // draw cloud
   public void cloud() {
+    beginShape();
+    ellipse(mouseX-15, mouseY+10, cloudSize, cloudSize);
+    ellipse(mouseX+55, mouseY+10, cloudSize, cloudSize);
+    ellipse(mouseX+8, mouseY-10, cloudSize, cloudSize);
+    ellipse(mouseX+33, mouseY-10, cloudSize, cloudSize);
+    ellipse(mouseX+20, mouseY-15, cloudSize, cloudSize);
 
+
+    for(int i = 0; i < 2; i++) {
+      for (int j = 0; j < 3; j++) {
+      ellipse(mouseX + (j*20), mouseY + (i*23), cloudSize, cloudSize);
+      }
+    } 
+    endShape(CLOSE);
   }
+
 
   // draw star
   public void star(float x, float y, float radius1, float radius2, int npoints) {
@@ -123,5 +219,5 @@ public class Sketch extends PApplet {
     endShape(CLOSE);
   }
 
-  
+
 }
